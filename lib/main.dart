@@ -1,162 +1,121 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'models/record.dart';
-import 'theme/colors.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Hive
-  final directory = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter(directory.path);
-  
-  // Register Adapter
-  // Note: record.g.dart usually needs to be generated. 
-  // For manual setup, we'd need to run build_runner.
-  // We assume the user will run 'flutter pub run build_runner build'
-  // But for the sake of this code, we assume it's registered.
-  // Hive.registerAdapter(TeaRecordAdapter());
-  
-  await Hive.openBox<TeaRecord>('records');
-  
-  runApp(const TeaPickingApp());
+void main() {
+  runApp(const MyApp());
 }
 
-class TeaPickingApp extends StatelessWidget {
-  const TeaPickingApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tea Picker',
-      theme: TeaTheme.light,
-      home: const MyHomePage(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
-  final Box<TeaRecord> _recordBox = Hive.box<TeaRecord>('records');
+  int _counter = 0;
 
-  void _saveRecord() {
-    final name = _nameController.text;
-    final weight = double.tryParse(_weightController.text) ?? 0.0;
-
-    if (name.isNotEmpty && weight > 0) {
-      final record = TeaRecord(
-        employeeName: name,
-        weight: weight,
-        timestamp: DateTime.now(),
-      );
-      _recordBox.add(record);
-      
-      _nameController.clear();
-      _weightController.clear();
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Record Saved!'), backgroundColor: TeaTheme.primaryGreen),
-      );
-      setState(() {});
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter valid details'), backgroundColor: Colors.red),
-      );
-    }
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tea Picking Record', style: TextStyle(color: Colors.white)),
-        backgroundColor: TeaTheme.primaryGreen,
-        centerTitle: true,
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
         child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          //
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: .center,
           children: [
-            // Input Section
-            Card(
-              elevation: 4,
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Employee Name'),
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _weightController,
-                      decoration: const InputDecoration(labelText: 'Weight (KG)', suffixText: 'kg'),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _saveRecord,
-                        child: const Text('SUBMIT WEIGHT'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Recent Records',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: TeaTheme.primaryGreen),
-            ),
-            const Divider(),
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: _recordBox.listenable(),
-                builder: (context, Box<TeaRecord> box, _) {
-                  if (box.values.isEmpty) {
-                    return const Center(child: Text('No records yet.'));
-                  }
-                  
-                  final records = box.values.toList().reversed.toList();
-                  return ListView.builder(
-                    itemCount: records.length,
-                    itemBuilder: (context, index) {
-                      final record = records[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: TeaTheme.lightGreen,
-                            child: Icon(Icons.eco, color: TeaTheme.primaryGreen),
-                          ),
-                          title: Text(record.employeeName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(record.timestamp)),
-                          trailing: Text('${record.weight} kg', style: const TextStyle(fontSize: 18, color: TeaTheme.primaryGreen, fontWeight: FontWeight.w600)),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+            const Text('You have pushed the button this many times:'),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
       ),
     );
   }
